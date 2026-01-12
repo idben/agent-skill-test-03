@@ -3,178 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>加法計算器</title>
+  <title>Language Switcher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      background: #f5f5f5;
-    }
-
-    .calculator {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 320px;
-    }
-
-    h1 {
-      margin: 0 0 1.5rem;
-      font-size: 1.5rem;
-      text-align: center;
-      color: #333;
-    }
-
-    .input-group {
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #555;
-      font-size: 0.9rem;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: #4a90d9;
-      box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
-    }
-
-    .btn-calculate {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      background: #4a90d9;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-calculate:hover {
-      background: #3a7bc8;
-    }
-
-    /* Dialog 樣式 */
     dialog {
       border: none;
-      border-radius: 12px;
-      padding: 1.5rem;
-      max-width: 300px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 0.5rem;
+      padding: 0;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     dialog::backdrop {
       background: rgba(0, 0, 0, 0.5);
+      animation: backdropFadeIn 0.3s ease;
     }
 
-    dialog .message {
-      margin: 0 0 1.5rem;
-      font-size: 1.1rem;
-      text-align: center;
-      color: #333;
+    dialog {
+      --animate-duration: 0.3s;
     }
 
-    dialog .result {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #4a90d9;
+    dialog.dialog-closing::backdrop {
+      animation: backdropFadeOut 0.3s ease forwards;
     }
 
-    dialog button {
-      display: block;
-      width: 100%;
-      padding: 0.75rem;
-      background: #4a90d9;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
+    @keyframes backdropFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes backdropFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    .list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background: white;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      text-align: left;
+      width: 100%;
     }
 
-    dialog button:hover {
-      background: #3a7bc8;
+    .list-item:hover {
+      background: #f3f4f6;
+      border-color: #3b82f6;
+    }
+
+    .list-icon {
+      font-size: 1.5rem;
     }
   </style>
 </head>
-<body>
-  <div class="calculator">
-    <h1>加法計算器</h1>
-    <div class="input-group">
-      <label for="numberA">第一個數字</label>
-      <input type="number" id="numberA" placeholder="請輸入數字">
-    </div>
-    <div class="input-group">
-      <label for="numberB">第二個數字</label>
-      <input type="number" id="numberB" placeholder="請輸入數字">
-    </div>
-    <button type="button" class="btn-calculate">計算</button>
-  </div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-center">
 
-  <!-- Alert Dialog -->
-  <dialog id="alertDialog">
-    <p class="message"></p>
-    <button type="button" autofocus>確定</button>
+  <main class="text-center">
+    <p id="greeting" class="text-gray-800 font-bold mb-8" style="font-size: 60px;">
+      你好
+    </p>
+
+    <button
+      type="button"
+      id="btnSwitchLang"
+      class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg rounded-lg shadow-md transition-colors"
+    >
+      切換語言
+    </button>
+  </main>
+
+  <!-- Custom Dialog for Language Selection -->
+  <dialog id="customDialog" class="rounded-lg">
+    <div class="dialog-header flex items-center gap-3 px-4 pt-4 pb-2">
+      <span class="dialog-icon text-2xl"></span>
+      <h6 class="dialog-title text-lg font-semibold text-gray-800"></h6>
+    </div>
+    <div class="dialog-body px-4 pb-4">
+      <div class="dialog-content"></div>
+    </div>
+    <div class="dialog-footer flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200"></div>
   </dialog>
 
-  <script>
-    const numberA = document.querySelector('#numberA');
-    const numberB = document.querySelector('#numberB');
-    const btnCalculate = document.querySelector('.btn-calculate');
-    const alertDialog = document.querySelector('#alertDialog');
+  <script type="module">
+    import { init, showDialog } from './dialog-api.js';
 
-    async function showAlert(message) {
-      alertDialog.querySelector('.message').innerHTML = message;
-      alertDialog.showModal();
-      return new Promise(resolve => {
-        alertDialog.querySelector('button').onclick = () => {
-          alertDialog.close();
-          resolve();
-        };
-      });
-    }
+    // Tailwind 按鈕樣式
+    const btnStyles = {
+      primary: 'px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors',
+      secondary: 'px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors',
+    };
 
-    btnCalculate.addEventListener('click', async () => {
-      const valueA = parseFloat(numberA.value);
-      const valueB = parseFloat(numberB.value);
-
-      if (isNaN(valueA) || isNaN(valueB)) {
-        await showAlert('請輸入有效的數字');
-        return;
+    // Tailwind 適配器
+    const tailwindAdapter = {
+      createButton: (text, style = 'secondary') => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = text;
+        btn.className = btnStyles[style] || btnStyles.secondary;
+        return btn;
+      },
+      setButtonStyle: (btn, style) => {
+        btn.className = 'btn-confirm ' + (btnStyles[style] || btnStyles.primary);
+      },
+      getInputValue: (input) => input.value,
+      setInputValue: (input, value) => { input.value = value; },
+      setInputPlaceholder: (input, placeholder) => { input.placeholder = placeholder; },
+      setInputLabel: (label, text) => { label.textContent = text; },
+      focusInput: (input) => {
+        input.focus();
+        if (input.select) input.select();
       }
+    };
 
-      const sum = valueA + valueB;
-      await showAlert(`${valueA} + ${valueB} = <span class="result">${sum}</span>`);
+    // 初始化 DialogAPI
+    init({
+      dialogs: {
+        custom: document.querySelector('#customDialog')
+      },
+      adapter: tailwindAdapter
     });
 
-    // 按 Escape 關閉 dialog
-    alertDialog.addEventListener('cancel', (e) => {
-      e.preventDefault();
-      alertDialog.close();
+    // 語言對照表
+    const greetings = {
+      'zh': '你好',
+      'en': 'Hello',
+      'ja': 'こんにちは',
+      'de': 'Hallo',
+      'it': 'Ciao',
+      'fr': 'Bonjour'
+    };
+
+    // 切換語言按鈕
+    document.querySelector('#btnSwitchLang').addEventListener('click', async () => {
+      const lang = await showDialog('請選擇語言：', {
+        title: '切換語言',
+        icon: '🌐',
+        type: 'list',
+        options: [
+          { text: '中文', value: 'zh', icon: '🇹🇼' },
+          { text: 'English', value: 'en', icon: '🇺🇸' },
+          { text: '日本語', value: 'ja', icon: '🇯🇵' },
+          { text: 'Deutsch', value: 'de', icon: '🇩🇪' },
+          { text: 'Italiano', value: 'it', icon: '🇮🇹' },
+          { text: 'Français', value: 'fr', icon: '🇫🇷' }
+        ]
+      });
+
+      if (lang && greetings[lang]) {
+        document.querySelector('#greeting').textContent = greetings[lang];
+      }
     });
   </script>
 </body>
