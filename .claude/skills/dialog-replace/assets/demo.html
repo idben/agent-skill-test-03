@@ -211,11 +211,11 @@
       adapter: bootstrapAdapter
     });
 
-    // 取得 API 函數
-    var showAlert = DialogAPI.showAlert;
-    var showConfirm = DialogAPI.showConfirm;
-    var showPrompt = DialogAPI.showPrompt;
-    var showDialog = DialogAPI.showDialog;
+    // 取得 API 函數（使用 bind 綁定 this）
+    var showAlert = DialogAPI.showAlert.bind(DialogAPI);
+    var showConfirm = DialogAPI.showConfirm.bind(DialogAPI);
+    var showPrompt = DialogAPI.showPrompt.bind(DialogAPI);
+    var showDialog = DialogAPI.showDialog.bind(DialogAPI);
 
     // ============================================
     // 示範按鈕事件
