@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Replace Demo - Tailwind CSS 樣式</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    /* Dialog 基礎樣式 */
+    dialog {
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      animation: backdropFadeIn 0.3s ease;
+    }
+
+    /* 動畫設定 */
+    dialog {
+      --animate-duration: 0.3s;
+    }
+
+    dialog.dialog-closing::backdrop {
+      animation: backdropFadeOut 0.3s ease forwards;
+    }
+
+    @keyframes backdropFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes backdropFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Alert 類型樣式 */
+    dialog.alert-success .dialog-header { color: #16a34a; }
+    dialog.alert-error .dialog-header { color: #dc2626; }
+    dialog.alert-info .dialog-header { color: #2563eb; }
+
+    /* Prompt 錯誤提示 */
+    dialog .error-message {
+      display: none;
+    }
+
+    dialog .error-message.show {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-10 max-w-4xl">
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">Dialog Replace Demo</h1>
+      <p class="text-lg text-gray-500">使用原生 HTML <code class="bg-gray-200 px-1 rounded">&lt;dialog&gt;</code> 取代傳統 JavaScript 對話框</p>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Alert 區塊 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3">
+          <h5 class="font-semibold text-gray-800">Alert 訊息提示</h5>
+        </div>
+        <div class="p-4">
+          <p class="text-gray-500 text-sm mb-3">取代 <code class="bg-gray-100 px-1 rounded">window.alert()</code>，支援三種訊息類型</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors" id="btnAlertSuccess">
+              成功訊息
+            </button>
+            <button type="button" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors" id="btnAlertError">
+              錯誤訊息
+            </button>
+            <button type="button" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors" id="btnAlertInfo">
+              一般通知
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirm 區塊 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3">
+          <h5 class="font-semibold text-gray-800">Confirm 確認對話框</h5>
+        </div>
+        <div class="p-4">
+          <p class="text-gray-500 text-sm mb-3">取代 <code class="bg-gray-100 px-1 rounded">window.confirm()</code>，支援自定義按鈕</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-md transition-colors" id="btnConfirmDelete">
+              刪除確認
+            </button>
+            <button type="button" class="px-4 py-2 border border-yellow-500 text-yellow-600 hover:bg-yellow-50 rounded-md transition-colors" id="btnConfirmLeave">
+              離開確認
+            </button>
+            <button type="button" class="px-4 py-2 border border-gray-400 text-gray-600 hover:bg-gray-50 rounded-md transition-colors" id="btnConfirmCustom">
+              自定義按鈕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt 區塊 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3">
+          <h5 class="font-semibold text-gray-800">Prompt 輸入對話框</h5>
+        </div>
+        <div class="p-4">
+          <p class="text-gray-500 text-sm mb-3">取代 <code class="bg-gray-100 px-1 rounded">window.prompt()</code>，支援驗證輸入</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded-md transition-colors" id="btnPromptSimple">
+              簡單輸入
+            </button>
+            <button type="button" class="px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded-md transition-colors" id="btnPromptDefault">
+              預設值輸入
+            </button>
+            <button type="button" class="px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-50 rounded-md transition-colors" id="btnPromptValidate">
+              驗證輸入
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dialog 區塊 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-200 px-4 py-3">
+          <h5 class="font-semibold text-gray-800">Dialog 自定義對話框</h5>
+        </div>
+        <div class="p-4">
+          <p class="text-gray-500 text-sm mb-3">進階自定義對話框，支援多按鈕與複雜內容</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100 rounded-md transition-colors" id="btnDialogButtons">
+              多按鈕選擇
+            </button>
+            <button type="button" class="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100 rounded-md transition-colors" id="btnDialogHtml">
+              HTML 內容
+            </button>
+            <button type="button" class="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100 rounded-md transition-colors" id="btnDialogList">
+              清單選項
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center mt-10 text-gray-400">
+      <small>Dialog Replace Skill - 使用 Tailwind CSS 樣式</small>
+    </footer>
+  </div>
+
+  <!-- Alert Dialog -->
+  <dialog id="alertDialog" class="rounded-lg">
+    <div class="dialog-header flex items-center gap-3 px-4 pt-4 pb-2">
+      <span class="dialog-icon text-2xl"></span>
+      <h6 class="dialog-title text-lg font-semibold">提示</h6>
+    </div>
+    <div class="dialog-body px-4 pb-4">
+      <p class="message text-gray-700"></p>
+    </div>
+    <div class="dialog-footer flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200">
+      <button type="button" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors" autofocus>確定</button>
+    </div>
+  </dialog>
+
+  <!-- Confirm Dialog -->
+  <dialog id="confirmDialog" class="rounded-lg">
+    <div class="dialog-header flex items-center gap-3 px-4 pt-4 pb-2">
+      <span class="dialog-icon text-2xl">⚠️</span>
+      <h6 class="dialog-title text-lg font-semibold text-gray-800">確認</h6>
+    </div>
+    <div class="dialog-body px-4 pb-4">
+      <p class="message text-gray-700"></p>
+    </div>
+    <div class="dialog-footer flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200">
+      <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors">取消</button>
+      <button type="button" class="btn-confirm px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors" autofocus>確定</button>
+    </div>
+  </dialog>
+
+  <!-- Prompt Dialog -->
+  <dialog id="promptDialog" class="rounded-lg">
+    <form method="dialog">
+      <div class="dialog-header flex items-center gap-3 px-4 pt-4 pb-2">
+        <span class="dialog-icon text-2xl">✏️</span>
+        <h6 class="dialog-title text-lg font-semibold text-gray-800">輸入</h6>
+      </div>
+      <div class="dialog-body px-4 pb-4">
+        <label class="message block text-gray-700 mb-2"></label>
+        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" name="input" autofocus>
+        <div class="error-message text-red-500 text-sm mt-1"></div>
+      </div>
+      <div class="dialog-footer flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors">取消</button>
+        <button type="submit" class="btn-confirm px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">確定</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Custom Dialog -->
+  <dialog id="customDialog" class="rounded-lg">
+    <div class="dialog-header flex items-center gap-3 px-4 pt-4 pb-2">
+      <span class="dialog-icon text-2xl"></span>
+      <h6 class="dialog-title text-lg font-semibold text-gray-800"></h6>
+    </div>
+    <div class="dialog-body px-4 pb-4">
+      <div class="dialog-content"></div>
+    </div>
+    <div class="dialog-footer flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200"></div>
+  </dialog>
+
+  <script type="module">
+    import {
+      init,
+      showAlert,
+      showConfirm,
+      showPrompt,
+      showDialog
+    } from './dialog-api.js';
+
+    // Tailwind 按鈕樣式對照
+    const btnStyles = {
+      primary: 'px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors',
+      secondary: 'px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors',
+      danger: 'px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors',
+      success: 'px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors',
+      warning: 'px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition-colors',
+      light: 'px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors'
+    };
+
+    // Tailwind 適配器
+    const tailwindAdapter = {
+      createButton: (text, style = 'secondary') => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = text;
+        btn.className = btnStyles[style] || btnStyles.secondary;
+        return btn;
+      },
+      setButtonStyle: (btn, style) => {
+        btn.className = 'btn-confirm ' + (btnStyles[style] || btnStyles.primary);
+      },
+      getInputValue: (input) => input.value,
+      setInputValue: (input, value) => { input.value = value; },
+      setInputPlaceholder: (input, placeholder) => { input.placeholder = placeholder; },
+      setInputLabel: (label, text) => { label.textContent = text; },
+      focusInput: (input) => {
+        input.focus();
+        if (input.select) input.select();
+      }
+    };
+
+    // 初始化 DialogAPI
+    init({
+      dialogs: {
+        alert: document.querySelector('#alertDialog'),
+        confirm: document.querySelector('#confirmDialog'),
+        prompt: document.querySelector('#promptDialog'),
+        custom: document.querySelector('#customDialog')
+      },
+      adapter: tailwindAdapter
+    });
+
+    // ============================================
+    // 示範按鈕事件
+    // ============================================
+
+    // Alert 示範
+    document.querySelector('#btnAlertSuccess').addEventListener('click', async () => {
+      await showAlert('操作已成功完成！', 'success');
+    });
+
+    document.querySelector('#btnAlertError').addEventListener('click', async () => {
+      await showAlert('發生錯誤，請稍後再試。', 'error');
+    });
+
+    document.querySelector('#btnAlertInfo').addEventListener('click', async () => {
+      await showAlert('這是一則系統通知訊息。', 'info');
+    });
+
+    // Confirm 示範
+    document.querySelector('#btnConfirmDelete').addEventListener('click', async () => {
+      const result = await showConfirm('確定要刪除這筆資料嗎？此操作無法復原。', {
+        type: 'danger',
+        confirmText: '刪除',
+        cancelText: '取消'
+      });
+
+      if (result) {
+        await showAlert('資料已成功刪除', 'success');
+      } else {
+        await showAlert('已取消刪除操作', 'info');
+      }
+    });
+
+    document.querySelector('#btnConfirmLeave').addEventListener('click', async () => {
+      const result = await showConfirm('您有未儲存的變更，確定要離開嗎？', {
+        confirmText: '離開',
+        cancelText: '留下'
+      });
+
+      if (result) {
+        await showAlert('您已選擇離開', 'info');
+      } else {
+        await showAlert('您選擇留下繼續編輯', 'success');
+      }
+    });
+
+    document.querySelector('#btnConfirmCustom').addEventListener('click', async () => {
+      const result = await showConfirm('要使用深色模式還是淺色模式？', {
+        confirmText: '深色模式',
+        cancelText: '淺色模式'
+      });
+
+      if (result) {
+        await showAlert('已切換至深色模式', 'success');
+      } else {
+        await showAlert('已切換至淺色模式', 'success');
+      }
+    });
+
+    // Prompt 示範
+    document.querySelector('#btnPromptSimple').addEventListener('click', async () => {
+      const name = await showPrompt('請輸入您的名字：');
+
+      if (name) {
+        await showAlert(`歡迎，${name}！`, 'success');
+      } else {
+        await showAlert('您已取消輸入', 'info');
+      }
+    });
+
+    document.querySelector('#btnPromptDefault').addEventListener('click', async () => {
+      const nickname = await showPrompt('請輸入暱稱：', {
+        defaultValue: '匿名使用者'
+      });
+
+      if (nickname) {
+        await showAlert(`您的暱稱已設定為：${nickname}`, 'success');
+      } else {
+        await showAlert('您已取消設定暱稱', 'info');
+      }
+    });
+
+    document.querySelector('#btnPromptValidate').addEventListener('click', async () => {
+      const email = await showPrompt('請輸入 Email：', {
+        placeholder: 'example@mail.com',
+        validate: (value) => {
+          if (!value) return '請輸入 Email';
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            return 'Email 格式不正確';
+          }
+          return null;
+        }
+      });
+
+      if (email) {
+        await showAlert(`Email 已設定：${email}`, 'success');
+      } else {
+        await showAlert('您已取消輸入 Email', 'info');
+      }
+    });
+
+    // Dialog 示範
+    document.querySelector('#btnDialogButtons').addEventListener('click', async () => {
+      const action = await showDialog('請選擇檔案處理方式：', {
+        title: '檔案操作',
+        icon: '📁',
+        buttons: [
+          { text: '下載', value: 'download', style: 'primary' },
+          { text: '分享', value: 'share', style: 'secondary' },
+          { text: '刪除', value: 'delete', style: 'danger' },
+          { text: '取消', value: 'cancel', style: 'light' }
+        ]
+      });
+
+      const actionText = {
+        download: '下載檔案',
+        share: '分享檔案',
+        delete: '刪除檔案',
+        cancel: '取消操作'
+      };
+
+      await showAlert(`您選擇了：${actionText[action] || action}`, 'info');
+    });
+
+    document.querySelector('#btnDialogHtml').addEventListener('click', async () => {
+      const result = await showDialog({
+        title: '產品介紹',
+        icon: '🎧',
+        html: `
+          <div class="text-center">
+            <div class="bg-gray-100 rounded-lg p-6 mb-4">
+              <span class="text-6xl">🎧</span>
+            </div>
+            <h5 class="text-lg font-semibold mb-1">無線藍牙耳機 Pro</h5>
+            <p class="text-gray-500 text-sm mb-2">高品質音效，主動降噪，續航 24 小時</p>
+            <div class="flex justify-center gap-2 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">熱銷</span>
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">限時優惠</span>
+            </div>
+            <p class="text-2xl font-bold text-blue-500">NT$ 1,299</p>
+            <small class="text-gray-400 line-through">NT$ 1,999</small>
+          </div>
+        `,
+        buttons: [
+          { text: '加入購物車', value: 'cart', style: 'primary' },
+          { text: '關閉', value: 'close', style: 'secondary' }
+        ]
+      });
+
+      if (result === 'cart') {
+        await showAlert('已加入購物車！', 'success');
+      }
+    });
+
+    document.querySelector('#btnDialogList').addEventListener('click', async () => {
+      const lang = await showDialog('請選擇語言：', {
+        title: '切換語言',
+        icon: '🌐',
+        type: 'list',
+        options: [
+          { text: '繁體中文', value: 'zh-TW', icon: '🇹🇼' },
+          { text: 'English', value: 'en', icon: '🇺🇸' },
+          { text: '日本語', value: 'ja', icon: '🇯🇵' },
+          { text: '한국어', value: 'ko', icon: '🇰🇷' }
+        ]
+      });
+
+      if (lang) {
+        const langNames = {
+          'zh-TW': '繁體中文',
+          'en': 'English',
+          'ja': '日本語',
+          'ko': '한국어'
+        };
+        await showAlert(`已切換至：${langNames[lang]}`, 'success');
+      } else {
+        await showAlert('已取消切換語言', 'info');
+      }
+    });
+
+      </script>
+</body>
+</html>

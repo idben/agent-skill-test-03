@@ -1,0 +1,51 @@
+/**
+ * Dialog Replace Demo - Tailwind CSS 樣式
+ */
+
+/* Dialog 基礎樣式 */
+dialog {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  animation: backdropFadeIn 0.3s ease;
+}
+
+/* 動畫設定 */
+dialog {
+  --animate-duration: 0.3s;
+}
+
+dialog.dialog-closing::backdrop {
+  animation: backdropFadeOut 0.3s ease forwards;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Alert 類型樣式 */
+dialog.alert-success .dialog-header { color: #16a34a; }
+dialog.alert-error .dialog-header { color: #dc2626; }
+dialog.alert-info .dialog-header { color: #2563eb; }
+
+/* Prompt 錯誤提示 */
+dialog .error-message {
+  display: none;
+}
+
+dialog .error-message.show {
+  display: block;
+}

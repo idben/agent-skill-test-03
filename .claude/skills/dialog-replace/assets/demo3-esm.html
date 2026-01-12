@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Replace Demo - Shoelace 樣式</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --sl-color-primary-600: #0969da;
+    }
+
+    body {
+      font-family: var(--sl-font-sans);
+      background: var(--sl-color-neutral-100);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--sl-color-neutral-900);
+      margin: 0 0 0.5rem;
+    }
+
+    header p {
+      font-size: 1.125rem;
+      color: var(--sl-color-neutral-500);
+      margin: 0;
+    }
+
+    header code {
+      background: var(--sl-color-neutral-200);
+      padding: 0.125rem 0.375rem;
+      border-radius: var(--sl-border-radius-small);
+      font-size: 0.875em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      color: var(--sl-color-neutral-400);
+      font-size: 0.875rem;
+    }
+
+    /* Dialog 基礎樣式 */
+    dialog {
+      border: none;
+      border-radius: var(--sl-border-radius-large);
+      padding: 0;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: var(--sl-shadow-x-large);
+      background: var(--sl-color-neutral-0);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      animation: backdropFadeIn 0.3s ease;
+    }
+
+    dialog {
+      --animate-duration: 0.3s;
+    }
+
+    dialog.dialog-closing::backdrop {
+      animation: backdropFadeOut 0.3s ease forwards;
+    }
+
+    @keyframes backdropFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes backdropFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    dialog .dialog-header {
+      display: flex;
+      align-items: center;
+      padding: 1.25rem 1.25rem 0.75rem;
+      gap: 0.75rem;
+    }
+
+    dialog .dialog-header .dialog-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    dialog .dialog-header .dialog-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--sl-color-neutral-900);
+    }
+
+    dialog .dialog-body {
+      padding: 0.5rem 1.25rem 1.25rem;
+    }
+
+    dialog .dialog-body .message {
+      margin: 0;
+      color: var(--sl-color-neutral-700);
+      line-height: 1.5;
+    }
+
+    dialog .dialog-footer {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      padding: 1rem 1.25rem;
+      background: var(--sl-color-neutral-50);
+      border-top: 1px solid var(--sl-color-neutral-200);
+      border-radius: 0 0 var(--sl-border-radius-large) var(--sl-border-radius-large);
+    }
+
+    /* Alert 類型樣式 */
+    dialog.alert-success .dialog-header { color: var(--sl-color-success-600); }
+    dialog.alert-error .dialog-header { color: var(--sl-color-danger-600); }
+    dialog.alert-info .dialog-header { color: var(--sl-color-primary-600); }
+
+    /* Prompt 錯誤提示 */
+    dialog .error-message {
+      color: var(--sl-color-danger-600);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    dialog .error-message.show {
+      display: block;
+    }
+
+    /* Dialog 清單樣式 */
+    .list-container {
+      border: 1px solid var(--sl-color-neutral-200);
+      border-radius: var(--sl-border-radius-medium);
+      overflow: hidden;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: var(--sl-color-neutral-0);
+      border: none;
+      border-bottom: 1px solid var(--sl-color-neutral-200);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--sl-color-neutral-700);
+      transition: background 0.2s;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item:hover {
+      background: var(--sl-color-neutral-100);
+    }
+
+    .list-item .list-icon {
+      font-size: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dialog Replace Demo</h1>
+      <p>使用原生 HTML <code>&lt;dialog&gt;</code> 取代傳統 JavaScript 對話框</p>
+    </header>
+
+    <div class="grid">
+      <!-- Alert 區塊 -->
+      <sl-card>
+        <div slot="header">
+          <strong>Alert 訊息提示</strong>
+        </div>
+        <p style="color: var(--sl-color-neutral-500); font-size: 0.875rem; margin: 0 0 1rem;">
+          取代 <code>window.alert()</code>，支援三種訊息類型
+        </p>
+        <div class="button-group">
+          <sl-button variant="success" id="btnAlertSuccess">成功訊息</sl-button>
+          <sl-button variant="danger" id="btnAlertError">錯誤訊息</sl-button>
+          <sl-button variant="primary" id="btnAlertInfo">一般通知</sl-button>
+        </div>
+      </sl-card>
+
+      <!-- Confirm 區塊 -->
+      <sl-card>
+        <div slot="header">
+          <strong>Confirm 確認對話框</strong>
+        </div>
+        <p style="color: var(--sl-color-neutral-500); font-size: 0.875rem; margin: 0 0 1rem;">
+          取代 <code>window.confirm()</code>，支援自定義按鈕
+        </p>
+        <div class="button-group">
+          <sl-button variant="danger" outline id="btnConfirmDelete">刪除確認</sl-button>
+          <sl-button variant="warning" outline id="btnConfirmLeave">離開確認</sl-button>
+          <sl-button variant="neutral" outline id="btnConfirmCustom">自定義按鈕</sl-button>
+        </div>
+      </sl-card>
+
+      <!-- Prompt 區塊 -->
+      <sl-card>
+        <div slot="header">
+          <strong>Prompt 輸入對話框</strong>
+        </div>
+        <p style="color: var(--sl-color-neutral-500); font-size: 0.875rem; margin: 0 0 1rem;">
+          取代 <code>window.prompt()</code>，支援驗證輸入
+        </p>
+        <div class="button-group">
+          <sl-button variant="primary" outline id="btnPromptSimple">簡單輸入</sl-button>
+          <sl-button variant="primary" outline id="btnPromptDefault">預設值輸入</sl-button>
+          <sl-button variant="primary" outline id="btnPromptValidate">驗證輸入</sl-button>
+        </div>
+      </sl-card>
+
+      <!-- Dialog 區塊 -->
+      <sl-card>
+        <div slot="header">
+          <strong>Dialog 自定義對話框</strong>
+        </div>
+        <p style="color: var(--sl-color-neutral-500); font-size: 0.875rem; margin: 0 0 1rem;">
+          進階自定義對話框，支援多按鈕與複雜內容
+        </p>
+        <div class="button-group">
+          <sl-button variant="neutral" outline id="btnDialogButtons">多按鈕選擇</sl-button>
+          <sl-button variant="neutral" outline id="btnDialogHtml">HTML 內容</sl-button>
+          <sl-button variant="neutral" outline id="btnDialogList">清單選項</sl-button>
+        </div>
+      </sl-card>
+    </div>
+
+    <footer>
+      Dialog Replace Skill - 使用 Shoelace 樣式
+    </footer>
+  </div>
+
+  <!-- Alert Dialog -->
+  <dialog id="alertDialog">
+    <div class="dialog-header">
+      <span class="dialog-icon"></span>
+      <h6 class="dialog-title">提示</h6>
+    </div>
+    <div class="dialog-body">
+      <p class="message"></p>
+    </div>
+    <div class="dialog-footer">
+      <sl-button variant="primary" class="btn-ok">確定</sl-button>
+    </div>
+  </dialog>
+
+  <!-- Confirm Dialog -->
+  <dialog id="confirmDialog">
+    <div class="dialog-header">
+      <span class="dialog-icon">⚠️</span>
+      <h6 class="dialog-title">確認</h6>
+    </div>
+    <div class="dialog-body">
+      <p class="message"></p>
+    </div>
+    <div class="dialog-footer">
+      <sl-button variant="neutral" class="btn-cancel">取消</sl-button>
+      <sl-button variant="primary" class="btn-confirm">確定</sl-button>
+    </div>
+  </dialog>
+
+  <!-- Prompt Dialog -->
+  <dialog id="promptDialog">
+    <form method="dialog">
+      <div class="dialog-header">
+        <span class="dialog-icon">✏️</span>
+        <h6 class="dialog-title">輸入</h6>
+      </div>
+      <div class="dialog-body">
+        <sl-input class="prompt-input" label="" help-text=""></sl-input>
+        <div class="error-message"></div>
+      </div>
+      <div class="dialog-footer">
+        <sl-button variant="neutral" class="btn-cancel" type="button">取消</sl-button>
+        <sl-button variant="primary" class="btn-confirm" type="submit">確定</sl-button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Custom Dialog -->
+  <dialog id="customDialog">
+    <div class="dialog-header">
+      <span class="dialog-icon"></span>
+      <h6 class="dialog-title"></h6>
+    </div>
+    <div class="dialog-body">
+      <div class="dialog-content"></div>
+    </div>
+    <div class="dialog-footer"></div>
+  </dialog>
+
+  <script type="module">
+    import {
+      init,
+      showAlert,
+      showConfirm,
+      showPrompt,
+      showDialog
+    } from './dialog-api.js';
+
+    // Shoelace 按鈕 variant 對照
+    const btnVariants = {
+      primary: 'primary',
+      secondary: 'neutral',
+      danger: 'danger',
+      success: 'success',
+      warning: 'warning',
+      light: 'neutral'
+    };
+
+    // Shoelace 適配器
+    const shoelaceAdapter = {
+      createButton: (text, style = 'secondary') => {
+        const btn = document.createElement('sl-button');
+        btn.variant = btnVariants[style] || 'neutral';
+        if (style === 'light') {
+          btn.outline = true;
+        }
+        btn.textContent = text;
+        return btn;
+      },
+      setButtonStyle: (btn, style) => {
+        btn.variant = btnVariants[style] || 'primary';
+      },
+      getInputValue: (input) => input.value,
+      setInputValue: (input, value) => { input.value = value; },
+      setInputPlaceholder: (input, placeholder) => { input.placeholder = placeholder; },
+      setInputLabel: (label, text) => {
+        // Shoelace sl-input 使用 label 屬性
+        if (label.tagName === 'SL-INPUT' || label.classList.contains('prompt-input')) {
+          label.label = text;
+        } else {
+          label.textContent = text;
+        }
+      },
+      focusInput: (input) => {
+        setTimeout(() => {
+          input.focus();
+          if (input.select) input.select();
+        }, 100);
+      }
+    };
+
+    // 初始化 DialogAPI
+    init({
+      dialogs: {
+        alert: document.querySelector('#alertDialog'),
+        confirm: document.querySelector('#confirmDialog'),
+        prompt: document.querySelector('#promptDialog'),
+        custom: document.querySelector('#customDialog')
+      },
+      adapter: shoelaceAdapter
+    });
+
+    // ============================================
+    // 示範按鈕事件
+    // ============================================
+
+    // Alert 示範
+    document.querySelector('#btnAlertSuccess').addEventListener('click', async () => {
+      await showAlert('操作已成功完成！', 'success');
+    });
+
+    document.querySelector('#btnAlertError').addEventListener('click', async () => {
+      await showAlert('發生錯誤，請稍後再試。', 'error');
+    });
+
+    document.querySelector('#btnAlertInfo').addEventListener('click', async () => {
+      await showAlert('這是一則系統通知訊息。', 'info');
+    });
+
+    // Confirm 示範
+    document.querySelector('#btnConfirmDelete').addEventListener('click', async () => {
+      const result = await showConfirm('確定要刪除這筆資料嗎？此操作無法復原。', {
+        type: 'danger',
+        confirmText: '刪除',
+        cancelText: '取消'
+      });
+
+      if (result) {
+        await showAlert('資料已成功刪除', 'success');
+      } else {
+        await showAlert('已取消刪除操作', 'info');
+      }
+    });
+
+    document.querySelector('#btnConfirmLeave').addEventListener('click', async () => {
+      const result = await showConfirm('您有未儲存的變更，確定要離開嗎？', {
+        confirmText: '離開',
+        cancelText: '留下'
+      });
+
+      if (result) {
+        await showAlert('您已選擇離開', 'info');
+      } else {
+        await showAlert('您選擇留下繼續編輯', 'success');
+      }
+    });
+
+    document.querySelector('#btnConfirmCustom').addEventListener('click', async () => {
+      const result = await showConfirm('要使用深色模式還是淺色模式？', {
+        confirmText: '深色模式',
+        cancelText: '淺色模式'
+      });
+
+      if (result) {
+        await showAlert('已切換至深色模式', 'success');
+      } else {
+        await showAlert('已切換至淺色模式', 'success');
+      }
+    });
+
+    // Prompt 示範
+    document.querySelector('#btnPromptSimple').addEventListener('click', async () => {
+      const name = await showPrompt('請輸入您的名字：');
+
+      if (name) {
+        await showAlert(`歡迎，${name}！`, 'success');
+      } else {
+        await showAlert('您已取消輸入', 'info');
+      }
+    });
+
+    document.querySelector('#btnPromptDefault').addEventListener('click', async () => {
+      const nickname = await showPrompt('請輸入暱稱：', {
+        defaultValue: '匿名使用者'
+      });
+
+      if (nickname) {
+        await showAlert(`您的暱稱已設定為：${nickname}`, 'success');
+      } else {
+        await showAlert('您已取消設定暱稱', 'info');
+      }
+    });
+
+    document.querySelector('#btnPromptValidate').addEventListener('click', async () => {
+      const email = await showPrompt('請輸入 Email：', {
+        placeholder: 'example@mail.com',
+        validate: (value) => {
+          if (!value) return '請輸入 Email';
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            return 'Email 格式不正確';
+          }
+          return null;
+        }
+      });
+
+      if (email) {
+        await showAlert(`Email 已設定：${email}`, 'success');
+      } else {
+        await showAlert('您已取消輸入 Email', 'info');
+      }
+    });
+
+    // Dialog 示範
+    document.querySelector('#btnDialogButtons').addEventListener('click', async () => {
+      const action = await showDialog('請選擇檔案處理方式：', {
+        title: '檔案操作',
+        icon: '📁',
+        buttons: [
+          { text: '下載', value: 'download', style: 'primary' },
+          { text: '分享', value: 'share', style: 'secondary' },
+          { text: '刪除', value: 'delete', style: 'danger' },
+          { text: '取消', value: 'cancel', style: 'light' }
+        ]
+      });
+
+      const actionText = {
+        download: '下載檔案',
+        share: '分享檔案',
+        delete: '刪除檔案',
+        cancel: '取消操作'
+      };
+
+      await showAlert(`您選擇了：${actionText[action] || action}`, 'info');
+    });
+
+    document.querySelector('#btnDialogHtml').addEventListener('click', async () => {
+      const result = await showDialog({
+        title: '產品介紹',
+        icon: '🎧',
+        html: `
+          <div style="text-align: center;">
+            <div style="background: var(--sl-color-neutral-100); border-radius: var(--sl-border-radius-large); padding: 1.5rem; margin-bottom: 1rem;">
+              <span style="font-size: 4rem;">🎧</span>
+            </div>
+            <h5 style="margin: 0 0 0.25rem; font-size: 1.125rem; font-weight: 600;">無線藍牙耳機 Pro</h5>
+            <p style="color: var(--sl-color-neutral-500); font-size: 0.875rem; margin: 0 0 0.5rem;">高品質音效，主動降噪，續航 24 小時</p>
+            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <sl-badge variant="success">熱銷</sl-badge>
+              <sl-badge variant="warning">限時優惠</sl-badge>
+            </div>
+            <p style="font-size: 1.5rem; font-weight: 700; color: var(--sl-color-primary-600); margin: 0;">NT$ 1,299</p>
+            <small style="color: var(--sl-color-neutral-400); text-decoration: line-through;">NT$ 1,999</small>
+          </div>
+        `,
+        buttons: [
+          { text: '加入購物車', value: 'cart', style: 'primary' },
+          { text: '關閉', value: 'close', style: 'secondary' }
+        ]
+      });
+
+      if (result === 'cart') {
+        await showAlert('已加入購物車！', 'success');
+      }
+    });
+
+    document.querySelector('#btnDialogList').addEventListener('click', async () => {
+      const lang = await showDialog('請選擇語言：', {
+        title: '切換語言',
+        icon: '🌐',
+        type: 'list',
+        options: [
+          { text: '繁體中文', value: 'zh-TW', icon: '🇹🇼' },
+          { text: 'English', value: 'en', icon: '🇺🇸' },
+          { text: '日本語', value: 'ja', icon: '🇯🇵' },
+          { text: '한국어', value: 'ko', icon: '🇰🇷' }
+        ]
+      });
+
+      if (lang) {
+        const langNames = {
+          'zh-TW': '繁體中文',
+          'en': 'English',
+          'ja': '日本語',
+          'ko': '한국어'
+        };
+        await showAlert(`已切換至：${langNames[lang]}`, 'success');
+      } else {
+        await showAlert('已取消切換語言', 'info');
+      }
+    });
+
+      </script>
+</body>
+</html>

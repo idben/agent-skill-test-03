@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue 3 Dialog 元件示範</title>
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    /* Dialog 基礎樣式 */
+    .dialog-container {
+      border: none;
+      border-radius: 12px;
+      padding: 0;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      --animate-duration: 0.3s;
+    }
+
+    .dialog-container::backdrop {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .dialog-icon {
+      font-size: 1.5rem;
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .dialog-body {
+      padding: 20px;
+    }
+
+    .dialog-body .message {
+      margin: 0;
+      color: #495057;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 20px;
+      border-top: 1px solid #e9ecef;
+    }
+
+    /* Alert 類型樣式 */
+    .alert-success .dialog-header {
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    }
+
+    .alert-error .dialog-header {
+      background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    }
+
+    .alert-info .dialog-header {
+      background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    }
+
+    /* 錯誤訊息 */
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* 清單選項樣式 */
+    .list-group-item-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-icon {
+      font-size: 1.2rem;
+    }
+
+    /* Dialog 內容區域 */
+    .dialog-content {
+      line-height: 1.6;
+    }
+
+    .dialog-content h5 {
+      color: #0d6efd;
+      margin-bottom: 1rem;
+    }
+
+    .dialog-content ul {
+      padding-left: 1.2rem;
+    }
+
+    .dialog-content .price {
+      font-size: 1.5rem;
+      color: #198754;
+      font-weight: bold;
+    }
+
+    /* Demo 區塊樣式 */
+    .demo-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .demo-section h5 {
+      color: #495057;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .result-display {
+      background: #e9ecef;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      min-height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container py-5">
+      <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Vue 3 Dialog 元件</h1>
+        <p class="lead text-muted">使用 Composition API 建立的原生 Dialog 元件</p>
+        <span class="badge bg-success me-2">Vue 3</span>
+        <span class="badge bg-primary me-2">Composition API</span>
+        <span class="badge bg-info">Animate.css</span>
+      </div>
+
+      <!-- Alert 示範 -->
+      <div class="demo-section">
+        <h5>Alert 訊息對話框</h5>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-success" @click="demoAlertSuccess">
+            成功訊息
+          </button>
+          <button class="btn btn-danger" @click="demoAlertError">
+            錯誤訊息
+          </button>
+          <button class="btn btn-info" @click="demoAlertInfo">
+            一般通知
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm 示範 -->
+      <div class="demo-section">
+        <h5>Confirm 確認對話框</h5>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button class="btn btn-outline-danger" @click="demoConfirmDelete">
+            刪除確認
+          </button>
+          <button class="btn btn-outline-warning" @click="demoConfirmLeave">
+            離開確認
+          </button>
+          <button class="btn btn-outline-primary" @click="demoConfirmCustom">
+            自定義按鈕
+          </button>
+        </div>
+        <div class="result-display">
+          結果：{{ confirmResult }}
+        </div>
+      </div>
+
+      <!-- Prompt 示範 -->
+      <div class="demo-section">
+        <h5>Prompt 輸入對話框</h5>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button class="btn btn-outline-secondary" @click="demoPromptSimple">
+            簡單輸入
+          </button>
+          <button class="btn btn-outline-secondary" @click="demoPromptDefault">
+            預設值輸入
+          </button>
+          <button class="btn btn-outline-secondary" @click="demoPromptValidate">
+            驗證輸入
+          </button>
+        </div>
+        <div class="result-display">
+          輸入值：{{ promptResult }}
+        </div>
+      </div>
+
+      <!-- Custom Dialog 示範 -->
+      <div class="demo-section">
+        <h5>Custom 自定義對話框</h5>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button class="btn btn-outline-dark" @click="demoDialogButtons">
+            多按鈕選擇
+          </button>
+          <button class="btn btn-outline-dark" @click="demoDialogHtml">
+            HTML 內容
+          </button>
+          <button class="btn btn-outline-dark" @click="demoDialogList">
+            清單選項
+          </button>
+        </div>
+        <div class="result-display">
+          選擇：{{ dialogResult }}
+        </div>
+      </div>
+
+      <!-- Dialog Container 元件 -->
+      <dialog-container
+        :is-open="dialog.isOpen.value"
+        :dialog-type="dialog.dialogType.value"
+        :config="dialog.config"
+        :animation-class="dialog.animationClass.value"
+        :is-closing="dialog.isClosing.value"
+        @alert-ok="dialog.handleAlertOk"
+        @confirm-cancel="dialog.handleConfirmCancel"
+        @confirm-ok="dialog.handleConfirmOk"
+        @prompt-cancel="dialog.handlePromptCancel"
+        @prompt-ok="dialog.handlePromptOk"
+        @input-change="dialog.handleInputChange"
+        @button-click="dialog.handleButtonClick"
+        @list-item-click="dialog.handleListItemClick"
+        @custom-cancel="dialog.handleCustomCancel"
+      ></dialog-container>
+    </div>
+  </div>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- Dialog 模組（內嵌版本，適用於 CDN 環境） -->
+  <script>
+    // ============================================
+    // useDialog Composable
+    // ============================================
+    const { ref, reactive, readonly, watch, nextTick, h, Teleport } = Vue;
+
+    const alertConfig = {
+      success: { icon: '', title: '成功', class: 'alert-success' },
+      error: { icon: '', title: '錯誤', class: 'alert-error' },
+      info: { icon: '', title: '通知', class: 'alert-info' }
+    };
+
+    const DialogType = {
+      ALERT: 'alert',
+      CONFIRM: 'confirm',
+      PROMPT: 'prompt',
+      CUSTOM: 'custom'
+    };
+
+    function useDialog() {
+      const isOpen = ref(false);
+      const dialogType = ref(DialogType.ALERT);
+      const animationClass = ref('');
+      const isClosing = ref(false);
+
+      const config = reactive({
+        title: '',
+        icon: '',
+        message: '',
+        alertType: 'info',
+        confirmText: '確定',
+        cancelText: '取消',
+        isDanger: false,
+        inputValue: '',
+        placeholder: '',
+        defaultValue: '',
+        validate: null,
+        errorMessage: '',
+        html: '',
+        buttons: [],
+        listOptions: [],
+        isListMode: false
+      });
+
+      let resolvePromise = null;
+
+      const resetConfig = () => {
+        config.title = '';
+        config.icon = '';
+        config.message = '';
+        config.alertType = 'info';
+        config.confirmText = '確定';
+        config.cancelText = '取消';
+        config.isDanger = false;
+        config.inputValue = '';
+        config.placeholder = '';
+        config.defaultValue = '';
+        config.validate = null;
+        config.errorMessage = '';
+        config.html = '';
+        config.buttons = [];
+        config.listOptions = [];
+        config.isListMode = false;
+      };
+
+      const openDialog = (type, animation = 'zoomIn') => {
+        dialogType.value = type;
+        animationClass.value = `animate__animated animate__${animation}`;
+        isClosing.value = false;
+        isOpen.value = true;
+      };
+
+      const closeDialog = (result, animation = 'zoomOut') => {
+        isClosing.value = true;
+        animationClass.value = `animate__animated animate__${animation}`;
+
+        setTimeout(() => {
+          isOpen.value = false;
+          isClosing.value = false;
+          animationClass.value = '';
+          resolvePromise?.(result);
+          resolvePromise = null;
+        }, 300);
+      };
+
+      const showAlert = (message, type = 'info') => {
+        resetConfig();
+        const alertCfg = alertConfig[type] || alertConfig.info;
+        config.title = alertCfg.title;
+        config.icon = alertCfg.icon;
+        config.message = message;
+        config.alertType = type;
+        openDialog(DialogType.ALERT, 'fadeInDown');
+        return new Promise(resolve => { resolvePromise = resolve; });
+      };
+
+      const showConfirm = (message, options = {}) => {
+        resetConfig();
+        const { type = 'default', confirmText = '確定', cancelText = '取消' } = options;
+        config.title = '確認';
+        config.icon = '';
+        config.message = message;
+        config.confirmText = confirmText;
+        config.cancelText = cancelText;
+        config.isDanger = type === 'danger';
+        openDialog(DialogType.CONFIRM, 'zoomIn');
+        return new Promise(resolve => { resolvePromise = resolve; });
+      };
+
+      const showPrompt = (message, options = {}) => {
+        resetConfig();
+        const { defaultValue = '', placeholder = '', validate = null } = options;
+        config.title = '輸入';
+        config.icon = '';
+        config.message = message;
+        config.inputValue = defaultValue;
+        config.defaultValue = defaultValue;
+        config.placeholder = placeholder;
+        config.validate = validate;
+        config.errorMessage = '';
+        openDialog(DialogType.PROMPT, 'fadeInDown');
+        return new Promise(resolve => { resolvePromise = resolve; });
+      };
+
+      const showDialog = (messageOrConfig, options = {}) => {
+        resetConfig();
+        let dialogConfig = {};
+        if (typeof messageOrConfig === 'string') {
+          dialogConfig = { message: messageOrConfig, ...options };
+        } else {
+          dialogConfig = messageOrConfig;
+        }
+
+        const {
+          title = '對話框',
+          icon = '',
+          message = '',
+          html = '',
+          buttons = [],
+          type = 'default',
+          options: listOptions = []
+        } = dialogConfig;
+
+        config.title = title;
+        config.icon = icon;
+        config.message = message;
+        config.html = html;
+        config.buttons = buttons;
+        config.listOptions = listOptions;
+        config.isListMode = type === 'list' && listOptions.length > 0;
+
+        openDialog(DialogType.CUSTOM, 'fadeIn');
+        return new Promise(resolve => { resolvePromise = resolve; });
+      };
+
+      // Event handlers
+      const handleAlertOk = () => closeDialog(undefined, 'fadeOutUp');
+      const handleConfirmCancel = () => closeDialog(false, 'zoomOut');
+      const handleConfirmOk = () => closeDialog(true, 'zoomOut');
+      const handlePromptCancel = () => closeDialog(null, 'fadeOutUp');
+
+      const handlePromptOk = () => {
+        if (config.validate) {
+          const error = config.validate(config.inputValue);
+          if (error) {
+            config.errorMessage = error;
+            return;
+          }
+        }
+        closeDialog(config.inputValue, 'fadeOutUp');
+      };
+
+      const handleInputChange = (value) => {
+        config.inputValue = value;
+        config.errorMessage = '';
+      };
+
+      const handleButtonClick = (value) => closeDialog(value, 'fadeOut');
+      const handleListItemClick = (value) => closeDialog(value, 'fadeOut');
+      const handleCustomCancel = () => closeDialog(null, 'fadeOut');
+
+      return {
+        isOpen: readonly(isOpen),
+        dialogType: readonly(dialogType),
+        config: readonly(config),
+        animationClass: readonly(animationClass),
+        isClosing: readonly(isClosing),
+        showAlert,
+        showConfirm,
+        showPrompt,
+        showDialog,
+        handleAlertOk,
+        handleConfirmCancel,
+        handleConfirmOk,
+        handlePromptCancel,
+        handlePromptOk,
+        handleInputChange,
+        handleButtonClick,
+        handleListItemClick,
+        handleCustomCancel
+      };
+    }
+
+    // ============================================
+    // DialogContainer Component
+    // ============================================
+    const DialogContainer = {
+      name: 'DialogContainer',
+      props: {
+        isOpen: { type: Boolean, default: false },
+        dialogType: { type: String, default: DialogType.ALERT },
+        config: { type: Object, default: () => ({}) },
+        animationClass: { type: String, default: '' },
+        isClosing: { type: Boolean, default: false }
+      },
+      emits: [
+        'alert-ok', 'confirm-cancel', 'confirm-ok',
+        'prompt-cancel', 'prompt-ok', 'input-change',
+        'button-click', 'list-item-click', 'custom-cancel'
+      ],
+      setup(props, { emit }) {
+        const dialogRef = ref(null);
+        const inputRef = ref(null);
+
+        watch(() => props.isOpen, async (newVal) => {
+          await nextTick();
+          if (newVal && dialogRef.value) {
+            dialogRef.value.showModal();
+            if (props.dialogType === DialogType.PROMPT && inputRef.value) {
+              setTimeout(() => {
+                inputRef.value?.focus();
+                inputRef.value?.select();
+              }, 100);
+            }
+          } else if (!newVal && dialogRef.value) {
+            dialogRef.value.close();
+          }
+        });
+
+        const handleCancel = (e) => e.preventDefault();
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          emit('prompt-ok');
+        };
+
+        return { dialogRef, inputRef, handleCancel, handleSubmit };
+      },
+      render() {
+        const { isOpen, dialogType, config, animationClass, isClosing } = this.$props;
+        if (!isOpen) return null;
+
+        const alertTypeClass = config.alertType ? `alert-${config.alertType}` : '';
+        let dialogContent;
+
+        switch (dialogType) {
+          case DialogType.ALERT:
+            dialogContent = this.renderAlert();
+            break;
+          case DialogType.CONFIRM:
+            dialogContent = this.renderConfirm();
+            break;
+          case DialogType.PROMPT:
+            dialogContent = this.renderPrompt();
+            break;
+          case DialogType.CUSTOM:
+            dialogContent = this.renderCustom();
+            break;
+          default:
+            dialogContent = null;
+        }
+
+        return h(Teleport, { to: 'body' }, [
+          h('dialog', {
+            ref: 'dialogRef',
+            class: ['dialog-container', alertTypeClass, animationClass, { 'dialog-closing': isClosing }],
+            onCancel: this.handleCancel
+          }, dialogContent)
+        ]);
+      },
+      methods: {
+        renderAlert() {
+          const { config } = this.$props;
+          return [
+            h('div', { class: 'dialog-header' }, [
+              h('span', { class: 'dialog-icon' }, config.icon),
+              h('h6', { class: 'dialog-title' }, config.title)
+            ]),
+            h('div', { class: 'dialog-body' }, [
+              h('p', { class: 'message' }, config.message)
+            ]),
+            h('div', { class: 'dialog-footer' }, [
+              h('button', {
+                type: 'button',
+                class: 'btn btn-primary',
+                onClick: () => this.$emit('alert-ok')
+              }, '確定')
+            ])
+          ];
+        },
+        renderConfirm() {
+          const { config } = this.$props;
+          return [
+            h('div', { class: 'dialog-header' }, [
+              h('span', { class: 'dialog-icon' }, config.icon),
+              h('h6', { class: 'dialog-title' }, config.title)
+            ]),
+            h('div', { class: 'dialog-body' }, [
+              h('p', { class: 'message' }, config.message)
+            ]),
+            h('div', { class: 'dialog-footer' }, [
+              h('button', {
+                type: 'button',
+                class: 'btn btn-secondary',
+                onClick: () => this.$emit('confirm-cancel')
+              }, config.cancelText),
+              h('button', {
+                type: 'button',
+                class: ['btn', config.isDanger ? 'btn-danger' : 'btn-primary'],
+                onClick: () => this.$emit('confirm-ok')
+              }, config.confirmText)
+            ])
+          ];
+        },
+        renderPrompt() {
+          const { config } = this.$props;
+          return [
+            h('form', { onSubmit: this.handleSubmit }, [
+              h('div', { class: 'dialog-header' }, [
+                h('span', { class: 'dialog-icon' }, config.icon),
+                h('h6', { class: 'dialog-title' }, config.title)
+              ]),
+              h('div', { class: 'dialog-body' }, [
+                h('label', { class: 'form-label message' }, config.message),
+                h('input', {
+                  ref: 'inputRef',
+                  type: 'text',
+                  class: 'form-control',
+                  value: config.inputValue,
+                  placeholder: config.placeholder,
+                  onInput: (e) => this.$emit('input-change', e.target.value)
+                }),
+                config.errorMessage
+                  ? h('div', { class: 'error-message show' }, config.errorMessage)
+                  : null
+              ]),
+              h('div', { class: 'dialog-footer' }, [
+                h('button', {
+                  type: 'button',
+                  class: 'btn btn-secondary',
+                  onClick: () => this.$emit('prompt-cancel')
+                }, config.cancelText),
+                h('button', { type: 'submit', class: 'btn btn-primary' }, config.confirmText)
+              ])
+            ])
+          ];
+        },
+        renderCustom() {
+          const { config } = this.$props;
+
+          if (config.isListMode) {
+            return [
+              h('div', { class: 'dialog-header' }, [
+                h('span', { class: 'dialog-icon' }, config.icon),
+                h('h6', { class: 'dialog-title' }, config.title)
+              ]),
+              h('div', { class: 'dialog-body' }, [
+                config.message ? h('p', { class: 'mb-3' }, config.message) : null,
+                h('div', { class: 'list-group' },
+                  config.listOptions.map(opt =>
+                    h('button', {
+                      type: 'button',
+                      class: 'list-group-item list-group-item-action',
+                      onClick: () => this.$emit('list-item-click', opt.value)
+                    }, [
+                      opt.icon ? h('span', { class: 'list-icon' }, opt.icon) : null,
+                      h('span', null, opt.text)
+                    ])
+                  )
+                )
+              ]),
+              h('div', { class: 'dialog-footer' }, [
+                h('button', {
+                  type: 'button',
+                  class: 'btn btn-secondary',
+                  onClick: () => this.$emit('custom-cancel')
+                }, '取消')
+              ])
+            ];
+          }
+
+          return [
+            h('div', { class: 'dialog-header' }, [
+              h('span', { class: 'dialog-icon' }, config.icon),
+              h('h6', { class: 'dialog-title' }, config.title)
+            ]),
+            h('div', { class: 'dialog-body' }, [
+              config.html
+                ? h('div', { class: 'dialog-content', innerHTML: config.html })
+                : h('p', { class: 'message' }, config.message)
+            ]),
+            h('div', { class: 'dialog-footer' },
+              config.buttons.length > 0
+                ? config.buttons.map(btn =>
+                    h('button', {
+                      type: 'button',
+                      class: ['btn', `btn-${btn.style || 'secondary'}`],
+                      onClick: () => this.$emit('button-click', btn.value)
+                    }, btn.text)
+                  )
+                : [
+                    h('button', {
+                      type: 'button',
+                      class: 'btn btn-primary',
+                      onClick: () => this.$emit('button-click', 'ok')
+                    }, '確定')
+                  ]
+            )
+          ];
+        }
+      }
+    };
+
+    // ============================================
+    // Vue App
+    // ============================================
+    const app = Vue.createApp({
+      components: { DialogContainer },
+      setup() {
+        const dialog = useDialog();
+
+        // 結果顯示
+        const confirmResult = ref('尚未選擇');
+        const promptResult = ref('尚未輸入');
+        const dialogResult = ref('尚未選擇');
+
+        // Alert demos
+        const demoAlertSuccess = () => {
+          dialog.showAlert('操作已成功完成！', 'success');
+        };
+
+        const demoAlertError = () => {
+          dialog.showAlert('發生錯誤，請稍後再試。', 'error');
+        };
+
+        const demoAlertInfo = () => {
+          dialog.showAlert('這是一則系統通知訊息。', 'info');
+        };
+
+        // Confirm demos
+        const demoConfirmDelete = async () => {
+          const result = await dialog.showConfirm(
+            '確定要刪除這個項目嗎？此操作無法復原。',
+            { type: 'danger', confirmText: '刪除', cancelText: '取消' }
+          );
+          confirmResult.value = result ? '已確認刪除' : '已取消';
+          await dialog.showAlert(
+            result ? '項目已刪除' : '已取消刪除操作',
+            result ? 'success' : 'info'
+          );
+        };
+
+        const demoConfirmLeave = async () => {
+          const result = await dialog.showConfirm(
+            '您有未儲存的變更，確定要離開嗎？',
+            { confirmText: '離開', cancelText: '留下' }
+          );
+          confirmResult.value = result ? '選擇離開' : '選擇留下';
+          await dialog.showAlert(
+            result ? '已離開頁面' : '繼續編輯',
+            result ? 'info' : 'success'
+          );
+        };
+
+        const demoConfirmCustom = async () => {
+          const result = await dialog.showConfirm(
+            '您要儲存這份文件嗎？',
+            { confirmText: '儲存', cancelText: '不儲存' }
+          );
+          confirmResult.value = result ? '已儲存' : '不儲存';
+          await dialog.showAlert(
+            result ? '文件已儲存' : '文件未儲存',
+            result ? 'success' : 'info'
+          );
+        };
+
+        // Prompt demos
+        const demoPromptSimple = async () => {
+          const result = await dialog.showPrompt('請輸入您的名字：');
+          promptResult.value = result !== null ? `"${result}"` : '已取消';
+          if (result !== null) {
+            await dialog.showAlert(`您好，${result}！`, 'success');
+          }
+        };
+
+        const demoPromptDefault = async () => {
+          const result = await dialog.showPrompt('請輸入專案名稱：', {
+            defaultValue: 'my-project',
+            placeholder: '輸入專案名稱'
+          });
+          promptResult.value = result !== null ? `"${result}"` : '已取消';
+          if (result !== null) {
+            await dialog.showAlert(`專案「${result}」已建立！`, 'success');
+          }
+        };
+
+        const demoPromptValidate = async () => {
+          const result = await dialog.showPrompt('請輸入 Email：', {
+            placeholder: 'example@mail.com',
+            validate: (value) => {
+              if (!value) return '請輸入 Email';
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                return '請輸入有效的 Email 格式';
+              }
+              return null;
+            }
+          });
+          promptResult.value = result !== null ? `"${result}"` : '已取消';
+          if (result !== null) {
+            await dialog.showAlert(`Email 已設定為 ${result}`, 'success');
+          }
+        };
+
+        // Custom dialog demos
+        const demoDialogButtons = async () => {
+          const result = await dialog.showDialog({
+            title: '選擇操作',
+            icon: '',
+            message: '請選擇要執行的操作：',
+            buttons: [
+              { text: '儲存', value: 'save', style: 'primary' },
+              { text: '另存新檔', value: 'save-as', style: 'secondary' },
+              { text: '取消', value: 'cancel', style: 'outline-secondary' }
+            ]
+          });
+          dialogResult.value = result !== null ? `選擇了「${result}」` : '已取消';
+        };
+
+        const demoDialogHtml = async () => {
+          const result = await dialog.showDialog({
+            title: '產品資訊',
+            icon: '',
+            html: `
+              <h5>Vue 3 完整教學</h5>
+              <p>包含以下內容：</p>
+              <ul>
+                <li>Composition API 完整解析</li>
+                <li>響應式系統原理</li>
+                <li>元件設計模式</li>
+                <li>狀態管理最佳實踐</li>
+              </ul>
+              <p class="price">NT$ 1,299</p>
+            `,
+            buttons: [
+              { text: '立即購買', value: 'buy', style: 'success' },
+              { text: '加入購物車', value: 'cart', style: 'primary' },
+              { text: '關閉', value: 'close', style: 'secondary' }
+            ]
+          });
+          dialogResult.value = result !== null ? `選擇了「${result}」` : '已關閉';
+        };
+
+        const demoDialogList = async () => {
+          const result = await dialog.showDialog({
+            title: '選擇語言',
+            icon: '',
+            message: '請選擇介面語言：',
+            type: 'list',
+            options: [
+              { text: '繁體中文', value: 'zh-TW' },
+              { text: 'English', value: 'en' },
+              { text: '日本語', value: 'ja' },
+              { text: '한국어', value: 'ko' }
+            ]
+          });
+          dialogResult.value = result !== null ? `選擇了「${result}」` : '已取消';
+          if (result !== null) {
+            await dialog.showAlert(`語言已切換為 ${result}`, 'success');
+          }
+        };
+
+        return {
+          dialog,
+          confirmResult,
+          promptResult,
+          dialogResult,
+          demoAlertSuccess,
+          demoAlertError,
+          demoAlertInfo,
+          demoConfirmDelete,
+          demoConfirmLeave,
+          demoConfirmCustom,
+          demoPromptSimple,
+          demoPromptDefault,
+          demoPromptValidate,
+          demoDialogButtons,
+          demoDialogHtml,
+          demoDialogList
+        };
+      }
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
